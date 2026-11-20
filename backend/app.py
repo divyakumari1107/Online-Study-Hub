@@ -17,7 +17,7 @@ START_TIME = datetime.datetime.utcnow()
 ROOMS = {
     "room-tokyo-101": {
         "id": "room-tokyo-101",
-        "name": "Tokyo Midnight Lofi Room",
+        "name": "Learner's Room",
         "theme": "tokyo_rain",
         "bg_type": "city_rain",
         "created_at": datetime.datetime.utcnow().isoformat(),
