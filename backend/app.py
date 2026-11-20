@@ -144,7 +144,7 @@ def health():
     total_participants = sum(len(r["participants"]) for r in ROOMS.values())
     return jsonify({
         "status": "HEALTHY",
-        "service": "studyverse-core-engine",
+        "service": "online-study-hub-core",
         "version": "2.0.0-PROD",
         "uptime": uptime,
         "active_rooms": len(ROOMS),
@@ -167,7 +167,7 @@ def rooms():
             "created_at": datetime.datetime.utcnow().isoformat(),
             "participants": [{"id": "u-me", "name": "You", "avatar": "🎯", "status": "FOCUSING", "streak_days": 1}],
             "timer": {"mode": "POMODORO", "duration": 1500, "remaining": 1500, "is_running": False, "last_updated": time.time()},
-            "chat": [{"id": f"c-{int(time.time())}", "user": "System", "message": "Room created. Welcome to StudyVerse!", "timestamp": "Just now"}]
+            "chat": [{"id": f"c-{int(time.time())}", "user": "System", "message": "Room created. Welcome to Online Study Hub!", "timestamp": "Just now"}]
         }
         ROOMS[new_id] = room
         return jsonify({"message": "Room created successfully", "room": room}), 201

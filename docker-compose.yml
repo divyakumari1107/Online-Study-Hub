@@ -1,14 +1,14 @@
 services:
   backend:
     build: ./backend
-    container_name: studyverse-backend
+    container_name: studyhub-backend
     expose:
       - "8065"
     environment:
       - PORT=8065
       - ENV=production
     networks:
-      - studyverse-net
+      - studyhub-net
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8065/health"]
       interval: 8s
@@ -19,7 +19,7 @@ services:
 
   ingress:
     image: nginx:alpine
-    container_name: studyverse-ingress
+    container_name: studyhub-ingress
     ports:
       - "3030:80"
     volumes:
@@ -29,9 +29,9 @@ services:
       backend:
         condition: service_healthy
     networks:
-      - studyverse-net
+      - studyhub-net
     restart: unless-stopped
 
 networks:
-  studyverse-net:
+  studyhub-net:
     driver: bridge

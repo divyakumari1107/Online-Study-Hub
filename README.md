@@ -1,4 +1,4 @@
-# StudyVerse – AI-Powered Real-Time Collaborative Virtual Study Metaverse
+# Online Study Hub – AI-Powered Real-Time Collaborative Virtual Learning Platform
 
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Frontend](https://img.shields.io/badge/Frontend-Glassmorphism%20%7C%20Web%20Audio%20API-purple.svg)](web/index.html)
@@ -7,7 +7,7 @@
 [![Ingress](https://img.shields.io/badge/Ingress-Nginx%20Reverse%20Proxy-009639.svg)](nginx/nginx.conf)
 [![AI Engine](https://img.shields.io/badge/AI%20Engine-Synapse%20AI%20%2B%20SM--2-orange.svg)](backend/app.py)
 
-An enterprise-grade, real-time collaborative virtual study metaverse combining synchronized multiplayer Pomodoro rooms, Web Audio API ambient sound synthesis, AI flashcard generation, SuperMemo-2 (SM-2) spaced repetition algorithm, and cloud containerization.
+An enterprise-grade, real-time collaborative virtual learning platform combining synchronized multiplayer Pomodoro rooms, Web Audio API ambient sound synthesis, AI flashcard generation, SuperMemo-2 (SM-2) spaced repetition algorithm, and cloud containerization.
 
 ---
 
@@ -17,7 +17,7 @@ An enterprise-grade, real-time collaborative virtual study metaverse combining s
 flowchart TD
     Client["Learner / Web Browser"] --> Nginx["Nginx Reverse Proxy & Static Ingress (Port 3030)"]
     
-    subgraph Frontend_Experience ["StudyVerse Interactive UI & Sound Engine"]
+    subgraph Frontend_Experience ["Online Study Hub Interactive UI & Sound Engine"]
         UI["Glassmorphism Dark Theme Dashboard"]
         AUDIO["Web Audio API Synthesizer (Rain, 40Hz Binaural Beats, Fire)"]
         CARD["3D Flip Flashcards with SM-2 Spaced Repetition"]
@@ -29,7 +29,7 @@ flowchart TD
 
     Nginx --> UI
 
-    subgraph Backend_Services ["StudyVerse Core Microservices (Port 8065)"]
+    subgraph Backend_Services ["Online Study Hub Core Microservices (Port 8065)"]
         API["FastAPI / Flask Application Server"]
         ROOM_MGR["Multiplayer Room Manager & Timer Sync Engine"]
         AI_ENGINE["Synapse AI Flashcard & Feynman Explainer Engine"]
@@ -47,9 +47,9 @@ flowchart TD
 
 ---
 
-## ⚡ Comparison: Basic Study Webpage vs StudyVerse Platform
+## ⚡ Comparison: Basic Study Webpage vs Online Study Hub
 
-| Feature | Standard Study Websites (e.g. PHP/XAMPP) | **StudyVerse Platform (Our Implementation)** |
+| Feature | Standard Study Websites (e.g. PHP/XAMPP) | **Online Study Hub (Our Implementation)** |
 | :--- | :--- | :--- |
 | **Architecture** | Monolithic procedural PHP on Apache/XAMPP | **Decoupled Microservice: Docker, Docker Compose, Nginx Ingress** |
 | **Collaboration** | Single-user local page | **Multiplayer Synchronized Study Rooms with Live Status & Chat** |
@@ -66,7 +66,7 @@ flowchart TD
 - **Backend API**: Python 3.11, Flask, REST APIs, JSON
 - **Algorithms**: SuperMemo-2 (SM-2) Spaced Repetition Interval Calculator
 - **Infrastructure & Deployment**: Docker, Docker Compose, Nginx Ingress Reverse Proxy
-- **Testing**: Automated integration verification suite (`test_studyverse.py`)
+- **Testing**: Automated integration verification suite (`test_studyhub.py`)
 
 ---
 
@@ -79,14 +79,14 @@ docker compose up -d --build
 ```
 
 ### Access Application
-- **StudyVerse Dashboard**: [http://localhost:3030](http://localhost:3030)
+- **Online Study Hub Dashboard**: [http://localhost:3030](http://localhost:3030)
 - **Backend Health Probe**: [http://localhost:3030/health](http://localhost:3030/health)
 - **Study Rooms API**: [http://localhost:3030/api/rooms](http://localhost:3030/api/rooms)
 - **Flashcards API**: [http://localhost:3030/api/flashcards](http://localhost:3030/api/flashcards)
 
 ### Run Automated Test Suite
 ```powershell
-python test_studyverse.py
+python test_studyhub.py
 ```
 
 ---
@@ -94,8 +94,8 @@ python test_studyverse.py
 ## 📄 CV / Resume Bullet Points (Ready to Copy)
 
 ```markdown
-StudyVerse – AI-Powered Real-Time Collaborative Virtual Study Metaverse | GitHub    Nov '26
-• Developed a full-stack collaborative study metaverse featuring multiplayer synchronized Pomodoro timers, real-time group chat, and Web Audio API ambient sound synthesis.
+Online Study Hub – AI-Powered Real-Time Collaborative Virtual Learning Platform | GitHub    Nov '26
+• Developed a full-stack collaborative study platform featuring multiplayer synchronized Pomodoro timers, real-time group chat, and Web Audio API ambient sound synthesis.
 • Built an AI study companion and flashcard generator implementing the SuperMemo-2 (SM-2) spaced repetition algorithm for optimal memory retention and review scheduling.
 • Containerized frontend and backend services using multi-stage Docker builds and deployed behind an Nginx reverse proxy with automated health probes and CI/CD pipelines.
 Tech Stack: Python, Flask/FastAPI, WebSockets, Web Audio API, Docker, Docker Compose, Nginx, GitHub Actions, Bootstrap, Git
@@ -105,4 +105,4 @@ Tech Stack: Python, Flask/FastAPI, WebSockets, Web Audio API, Docker, Docker Com
 
 ## 👤 Author & Repository
 - **Author**: Divya Kumari ([@divyakumari1107](https://github.com/divyakumari1107))
-- **Repository**: [https://github.com/divyakumari1107/StudyVerse-Platform.git](https://github.com/divyakumari1107/StudyVerse-Platform.git)
+- **Repository**: [https://github.com/divyakumari1107/Online-Study-Hub.git](https://github.com/divyakumari1107/Online-Study-Hub.git)
