@@ -3,10 +3,20 @@ import time
 import datetime
 import random
 import uuid
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 
-app = Flask(__name__)
+WEB_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "web"))
+if not os.path.exists(WEB_DIR):
+    WEB_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "web"))
+
+PUBLIC_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "public"))
+if not os.path.exists(PUBLIC_DIR):
+    PUBLIC_DIR = WEB_DIR
+
+STATIC_DIRS = [WEB_DIR, PUBLIC_DIR]
+
+app = Flask(__name__, static_folder=WEB_DIR, static_url_path="")
 app.url_map.strict_slashes = False
 CORS(app)
 
@@ -368,6 +378,23 @@ def tasks():
         return jsonify({"error": "Task not found"}), 404
 
     return jsonify({"tasks": TASKS}), 200
+
+# --- Static File Serving for Vercel & Render (Single Service Deployment) ---
+@app.route("/")
+def serve_index():
+    for folder in STATIC_DIRS:
+        idx_path = os.path.join(folder, "index.html")
+        if os.path.exists(idx_path):
+            return send_from_directory(folder, "index.html")
+    return jsonify({"service": "Online Study Hub API", "status": "UP"}), 200
+
+@app.route("/<path:filename>")
+def serve_static(filename):
+    for folder in STATIC_DIRS:
+        target = os.path.join(folder, filename)
+        if os.path.exists(target) and os.path.isfile(target):
+            return send_from_directory(folder, filename)
+    return jsonify({"error": "Resource not found"}), 404
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=PORT)
