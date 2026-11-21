@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Online Study Hub | AI-Powered Real-Time Collaborative Virtual Learning Platform</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: radial-gradient(circle at 20% 20%, #1e1035, #0b0f19 80%);
+      --card-bg: rgba(18, 24, 43, 0.7);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --accent: #8b5cf6;
+      --accent-glow: rgba(139, 92, 246, 0.4);
+      --neon-cyan: #06b6d4;
+      --neon-pink: #ec4899;
+    }
+    body {
+      background: var(--bg-gradient);
+      color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background 0.8s ease;
+    }
+    .navbar {
+      background: rgba(11, 15, 25, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--card-border);
+    }
+    .glass-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      transition: all 0.3s ease;
+    }
+    .glass-card:hover {
+      border-color: rgba(139, 92, 246, 0.3);
+    }
+    .pomo-circle {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      margin: 0 auto;
+    }
+    .pomo-svg {
+      transform: rotate(-90deg);
+    }
+    .pomo-bg {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.08);
+      stroke-width: 10;
+    }
+    .pomo-progress {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 10;
+      stroke-linecap: round;
+      stroke-dasharray: 565;
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset 1s linear, stroke 0.5s ease;
+    }
+    .pomo-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 2.2rem;
+      font-weight: 800;
+      font-family: monospace;
+      letter-spacing: 2px;
+    }
+    /* 3D Flashcard flip */
+    .flashcard-scene {
+      perspective: 1000px;
+      min-height: 200px;
+      cursor: pointer;
+    }
+    .flashcard-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-height: 200px;
+      text-align: center;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-style: preserve-3d;
+    }
+    .flashcard-inner.flipped {
+      transform: rotateY(180deg);
+    }
+    .flashcard-front, .flashcard-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    .flashcard-front {
+      background: linear-gradient(135deg, rgba(30, 27, 75, 0.8), rgba(49, 46, 129, 0.8));
+      border: 1px solid rgba(129, 140, 248, 0.3);
+    }
+    .flashcard-back {
+      background: linear-gradient(135deg, rgba(17, 24, 39, 0.9), rgba(15, 23, 42, 0.9));
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      transform: rotateY(180deg);
+    }
+    .chat-box {
+      height: 180px;
+      overflow-y: auto;
+      font-size: 0.85rem;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 3px;
+    }
+    .sound-slider {
+      accent-color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-dark sticky-top py-2 px-4">
+    <div class="container-fluid px-0">
+      <a class="navbar-brand d-flex align-items-center gap-2 fw-bold" href="#">
+        <i class="bi bi-mortarboard-fill text-warning fs-4"></i>
+        <span class="fs-4 bg-gradient-to-r text-transparent bg-clip-text text-light">Online Study Hub <span class="badge bg-primary text-light" style="font-size: 0.7rem;">v2.0 AI</span></span>
+      </a>
+
+      <!-- Ambient Sound Engine Controls -->
+      <div class="d-none d-md-flex align-items-center gap-3 glass-card px-3 py-1">
+        <span class="small text-secondary"><i class="bi bi-soundwave me-1 text-info"></i> Lofi Sound Mixer:</span>
+        <div class="d-flex align-items-center gap-2">
+          <button class="btn btn-sm btn-outline-light border-0" id="rainBtn" onclick="toggleSound('rain')"><i class="bi bi-cloud-rain-heavy text-info"></i></button>
+          <input type="range" class="form-range sound-slider" style="width: 60px;" min="0" max="1" step="0.1" value="0.4" id="rainVol" oninput="setVolume('rain', this.value)">
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <button class="btn btn-sm btn-outline-light border-0" id="binauralBtn" onclick="toggleSound('binaural')"><i class="bi bi-activity text-warning"></i></button>
+          <input type="range" class="form-range sound-slider" style="width: 60px;" min="0" max="1" step="0.1" value="0.3" id="binauralVol" oninput="setVolume('binaural', this.value)" title="40Hz Focus Binaural Beat">
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <button class="btn btn-sm btn-outline-light border-0" id="fireBtn" onclick="toggleSound('fire')"><i class="bi bi-fire text-danger"></i></button>
+          <input type="range" class="form-range sound-slider" style="width: 60px;" min="0" max="1" step="0.1" value="0.3" id="fireVol" oninput="setVolume('fire', this.value)">
+        </div>
+      </div>
+
+      <!-- Theme Switcher & Status -->
+      <div class="d-flex align-items-center gap-2">
+        <a href="/resume.html" class="btn btn-sm btn-info text-dark fw-bold d-flex align-items-center gap-1 shadow-sm px-3" title="View Divya Kumari's ATS Resume">
+          <i class="bi bi-file-earmark-person-fill"></i> Divya's Resume
+        </a>
+        <a href="/Divya_Kumari_Resume.pdf" download="Divya_Kumari_Resume.pdf" class="btn btn-sm btn-outline-success d-flex align-items-center gap-1" title="Download Resume PDF">
+          <i class="bi bi-download"></i> PDF
+        </a>
+        <select class="form-select form-select-sm bg-dark text-light border-secondary" id="themeSelect" onchange="changeTheme(this.value)">
+          <option value="tokyo">🌃 Tokyo Midnight Lofi</option>
+          <option value="cyberpunk">🌧️ Cyberpunk Rain</option>
+          <option value="library">📚 Oxford Library</option>
+          <option value="space">🌌 Deep Space Nebula</option>
+        </select>
+        <span class="badge bg-success py-2 px-3 mono"><i class="bi bi-wifi me-1"></i> Live Synced</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content Dashboard -->
+  <div class="container-fluid px-4 py-4">
+    <div class="row g-4">
+
+      <!-- LEFT COLUMN: Multi-User Study Room & Synced Pomodoro -->
+      <div class="col-lg-4">
+        <div class="glass-card p-4 h-100 d-flex flex-column justify-content-between">
+          <div>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div>
+                <h5 class="fw-bold mb-0" id="roomTitle">Learner's Room</h5>
+                <span class="small text-secondary">Multiplayer Synchronized Focus Room</span>
+              </div>
+              <span class="badge bg-primary" id="roomModeBadge">POMODORO</span>
+            </div>
+
+            <!-- Circular Pomodoro Timer -->
+            <div class="pomo-circle my-4">
+              <svg class="pomo-svg" width="200" height="200">
+                <circle class="pomo-bg" cx="100" cy="100" r="90"></circle>
+                <circle class="pomo-progress" id="pomoProgress" cx="100" cy="100" r="90"></circle>
+              </svg>
+              <div class="pomo-text" id="timerDisplay">25:00</div>
+            </div>
+
+            <!-- Timer Action Buttons -->
+            <div class="d-flex justify-content-center gap-2 mb-4">
+              <button class="btn btn-sm btn-outline-secondary" onclick="setTimerMode('POMODORO')">Pomodoro (25m)</button>
+              <button class="btn btn-sm btn-outline-secondary" onclick="setTimerMode('SHORT_BREAK')">Short Break (5m)</button>
+              <button class="btn btn-sm btn-outline-secondary" onclick="setTimerMode('LONG_BREAK')">Long Break (15m)</button>
+            </div>
+
+            <div class="d-flex justify-content-center gap-3 mb-4">
+              <button class="btn btn-primary px-4 fw-bold" id="playPauseBtn" onclick="toggleTimer()">
+                <i class="bi bi-play-fill me-1" id="playIcon"></i> <span id="playText">Start Focus</span>
+              </button>
+              <button class="btn btn-outline-secondary px-3" onclick="resetTimer()"><i class="bi bi-arrow-counterclockwise"></i></button>
+            </div>
+
+            <!-- Room Participants -->
+            <div class="mb-3">
+              <div class="small fw-bold text-secondary mb-2"><i class="bi bi-people-fill me-1"></i> Active Study Buddies:</div>
+              <div class="d-flex flex-wrap gap-2" id="participantsList">
+                <span class="badge bg-dark border border-secondary px-2 py-1">👩‍💻 Divya K. (14d 🔥)</span>
+                <span class="badge bg-dark border border-secondary px-2 py-1">🧑‍🔬 Alex R. (7d 🔥)</span>
+                <span class="badge bg-dark border border-secondary px-2 py-1">🎨 Maya S. (Break ☕)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Room Live Chat -->
+          <div class="border-top border-secondary pt-3 mt-3">
+            <div class="small fw-bold text-secondary mb-2"><i class="bi bi-chat-dots-fill me-1"></i> Room Chat</div>
+            <div class="chat-box custom-scroll p-2 border border-secondary rounded bg-dark mb-2" id="chatBox">
+              <div class="text-secondary small">[System] Connected to Room WebSocket stream.</div>
+            </div>
+            <div class="input-group input-group-sm">
+              <input type="text" class="form-control bg-dark text-light border-secondary" id="chatInput" placeholder="Send a message..." onkeydown="if(event.key==='Enter') sendChatMessage()">
+              <button class="btn btn-primary" onclick="sendChatMessage()"><i class="bi bi-send-fill"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MIDDLE COLUMN: AI Study Companion & Smart Spaced Repetition Flashcards -->
+      <div class="col-lg-4">
+        <div class="glass-card p-4 h-100 d-flex flex-column justify-content-between">
+          <div>
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="fw-bold mb-0 text-info"><i class="bi bi-stars me-1 text-warning"></i> Synapse AI Study Engine</h5>
+              <span class="badge bg-dark border border-info text-info mono">SM-2 Spaced Repetition</span>
+            </div>
+
+            <!-- AI Quick Action Tabs -->
+            <div class="input-group input-group-sm mb-3">
+              <input type="text" class="form-control bg-dark text-light border-secondary" id="aiTopicInput" placeholder="Enter topic (e.g. Distributed Consensus, Docker, AWS S3)...">
+              <button class="btn btn-warning text-dark fw-bold" onclick="generateAiFlashcards()"><i class="bi bi-magic me-1"></i> Generate Cards</button>
+            </div>
+
+            <!-- 3D Interactive Flashcard -->
+            <div class="small text-secondary mb-2 d-flex justify-content-between">
+              <span>Smart Flashcard (<span id="cardIndex">1</span>/<span id="cardTotal">3</span>)</span>
+              <span class="text-info">Click card to flip 🔄</span>
+            </div>
+            
+            <div class="flashcard-scene mb-3" onclick="flipCard()">
+              <div class="flashcard-inner" id="flashcardInner">
+                <div class="flashcard-front">
+                  <span class="badge bg-primary mb-2" id="cardTopic">Topic</span>
+                  <p class="fs-6 fw-semibold text-center mb-0 px-2" id="cardQuestion">Loading question...</p>
+                </div>
+                <div class="flashcard-back">
+                  <span class="badge bg-success mb-2">Answer & Explanation</span>
+                  <p class="small text-light text-center mb-0 px-2" id="cardAnswer">Loading answer...</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- SM-2 Repetition Feedback Rating -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <button class="btn btn-sm btn-outline-danger" onclick="reviewCard(1)">🔴 Hard</button>
+              <button class="btn btn-sm btn-outline-warning" onclick="reviewCard(3)">🟡 Good</button>
+              <button class="btn btn-sm btn-outline-success" onclick="reviewCard(5)">🟢 Easy (SM-2)</button>
+              <button class="btn btn-sm btn-outline-secondary" onclick="nextCard()"><i class="bi bi-chevron-right"></i> Next</button>
+            </div>
+
+            <!-- Feynman Technique Concept Explainer -->
+            <div class="border border-secondary rounded p-3 bg-dark">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="small fw-bold text-warning"><i class="bi bi-lightbulb-fill me-1"></i> Feynman AI Explainer</span>
+                <button class="btn btn-sm btn-link text-info p-0 text-decoration-none" onclick="explainConcept()">Explain Concept</button>
+              </div>
+              <div class="small text-light" id="feynmanOutput">
+                <em>Click "Explain Concept" or enter any syllabus topic to receive an instant, simple breakdown with key takeaways and quiz checkpoints.</em>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-center pt-3 mt-3 border-top border-secondary small text-secondary">
+            AI Algorithm: SuperMemo-2 (SM-2) calculates optimal memory consolidation curve.
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: Notes & Kanban Study Planner -->
+      <div class="col-lg-4">
+        <div class="glass-card p-4 h-100 d-flex flex-column justify-content-between">
+          <div>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="fw-bold mb-0 text-success"><i class="bi bi-journal-code me-1"></i> Study Notes & Routine</h5>
+              <button class="btn btn-sm btn-outline-success" onclick="saveNote()"><i class="bi bi-cloud-arrow-up-fill me-1"></i> Save Note</button>
+            </div>
+
+            <!-- Note Title & Editor -->
+            <input type="text" class="form-control form-control-sm bg-dark text-light border-secondary mb-2 fw-bold" id="noteTitle" value="Multi-Cloud High Availability Architecture Notes">
+            <textarea class="form-control form-control-sm bg-dark text-light border-secondary mb-3 custom-scroll" id="noteContent" rows="7" placeholder="Write markdown study notes here..."></textarea>
+
+            <!-- Kanban Tasks Tracker -->
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="small fw-bold text-secondary"><i class="bi bi-kanban-fill me-1"></i> Daily Study Sprint</span>
+              <button class="btn btn-sm btn-link text-success p-0 text-decoration-none" onclick="addNewTask()">+ Add Task</button>
+            </div>
+
+            <div class="d-flex flex-column gap-2" id="tasksList">
+              <div class="p-2 border border-secondary rounded bg-dark d-flex justify-content-between align-items-center small">
+                <span><i class="bi bi-check-circle text-warning me-1"></i> Review Kubernetes Ingress</span>
+                <span class="badge bg-warning text-dark">In Progress</span>
+              </div>
+              <div class="p-2 border border-secondary rounded bg-dark d-flex justify-content-between align-items-center small">
+                <span><i class="bi bi-circle text-secondary me-1"></i> LeetCode DP Sprint</span>
+                <span class="badge bg-secondary">To Do</span>
+              </div>
+              <div class="p-2 border border-secondary rounded bg-dark d-flex justify-content-between align-items-center small">
+                <span><i class="bi bi-check-circle-fill text-success me-1"></i> Distributed Storage Paper</span>
+                <span class="badge bg-success">Done</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-3 mt-3 border-top border-secondary text-secondary small d-flex justify-content-between">
+            <span>Streak: <strong class="text-warning">14 Days 🔥</strong></span>
+            <span>Focus Time Today: <strong class="text-info">2.5 Hours</strong></span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = "/api";
+    let currentRoomId = "room-tokyo-101";
+    let timerRunning = false;
+    let timerSeconds = 1500;
+    let timerDuration = 1500;
+    let timerInterval = null;
+    let flashcardsData = [];
+    let currentCardIdx = 0;
+
+    // Web Audio Synthesizer Engine (Real browser sound generator!)
+    let audioCtx = null;
+    let soundNodes = { rain: null, binaural: null, fire: null };
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function toggleSound(type) {
+      initAudio();
+      if (soundNodes[type]) {
+        soundNodes[type].stop();
+        soundNodes[type] = null;
+        document.getElementById(type + "Btn").classList.remove("text-success");
+      } else {
+        if (type === "rain") soundNodes.rain = createRainSound();
+        if (type === "binaural") soundNodes.binaural = createBinauralSound();
+        if (type === "fire") soundNodes.fire = createFireSound();
+        document.getElementById(type + "Btn").classList.add("text-success");
+      }
+    }
+
+    function createRainSound() {
+      const bufferSize = audioCtx.sampleRate * 2;
+      const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      const output = noiseBuffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        output[i] = Math.random() * 2 - 1;
+      }
+      const whiteNoise = audioCtx.createBufferSource();
+      whiteNoise.buffer = noiseBuffer;
+      whiteNoise.loop = true;
+
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = "lowpass";
+      filter.frequency.setValueAtTime(800, audioCtx.currentTime);
+
+      const gain = audioCtx.createGain();
+      gain.gain.setValueAtTime(parseFloat(document.getElementById("rainVol").value), audioCtx.currentTime);
+
+      whiteNoise.connect(filter);
+      filter.connect(gain);
+      gain.connect(audioCtx.destination);
+      whiteNoise.start(0);
+      whiteNoise.gainNode = gain;
+      return whiteNoise;
+    }
+
+    function createBinauralSound() {
+      // 200Hz left ear, 240Hz right ear = 40Hz Gamma Focus Frequency
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(210, audioCtx.currentTime);
+      gain.gain.setValueAtTime(parseFloat(document.getElementById("binauralVol").value) * 0.15, audioCtx.currentTime);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.gainNode = gain;
+      return osc;
+    }
+
+    function createFireSound() {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(60, audioCtx.currentTime);
+      gain.gain.setValueAtTime(parseFloat(document.getElementById("fireVol").value) * 0.1, audioCtx.currentTime);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.gainNode = gain;
+      return osc;
+    }
+
+    function setVolume(type, val) {
+      if (soundNodes[type] && soundNodes[type].gainNode) {
+        soundNodes[type].gainNode.gain.setValueAtTime(parseFloat(val) * 0.2, audioCtx.currentTime);
+      }
+    }
+
+    function changeTheme(theme) {
+      const b = document.body;
+      if (theme === "tokyo") b.style.background = "radial-gradient(circle at 20% 20%, #1e1035, #0b0f19 80%)";
+      if (theme === "cyberpunk") b.style.background = "radial-gradient(circle at 80% 20%, #0d273a, #030712 80%)";
+      if (theme === "library") b.style.background = "radial-gradient(circle at 50% 50%, #2b1810, #0a0604 90%)";
+      if (theme === "space") b.style.background = "radial-gradient(circle at 50% 30%, #17072b, #000000 95%)";
+    }
+
+    // --- Pomodoro Logic ---
+    function updateTimerDisplay() {
+      const m = Math.floor(timerSeconds / 60);
+      const s = timerSeconds % 60;
+      document.getElementById("timerDisplay").innerText = `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+      const circumference = 565;
+      const offset = circumference - (timerSeconds / timerDuration) * circumference;
+      document.getElementById("pomoProgress").style.strokeDashoffset = offset;
+    }
+
+    async function toggleTimer() {
+      const action = timerRunning ? "PAUSE" : "START";
+      timerRunning = !timerRunning;
+      document.getElementById("playIcon").className = timerRunning ? "bi bi-pause-fill me-1" : "bi bi-play-fill me-1";
+      document.getElementById("playText").innerText = timerRunning ? "Pause" : "Start Focus";
+
+      if (timerRunning) {
+        timerInterval = setInterval(() => {
+          if (timerSeconds > 0) {
+            timerSeconds--;
+            updateTimerDisplay();
+          } else {
+            clearInterval(timerInterval);
+            timerRunning = false;
+            alert("🎉 Pomodoro Session Completed! Great focus!");
+          }
+        }, 1000);
+      } else {
+        clearInterval(timerInterval);
+      }
+
+      try {
+        await fetch(`${API_BASE}/rooms/${currentRoomId}/timer/control`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: action })
+        });
+      } catch (e) {}
+    }
+
+    async function resetTimer() {
+      clearInterval(timerInterval);
+      timerRunning = false;
+      timerSeconds = timerDuration;
+      document.getElementById("playIcon").className = "bi bi-play-fill me-1";
+      document.getElementById("playText").innerText = "Start Focus";
+      updateTimerDisplay();
+      try {
+        await fetch(`${API_BASE}/rooms/${currentRoomId}/timer/control`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "RESET" })
+        });
+      } catch (e) {}
+    }
+
+    async function setTimerMode(mode) {
+      clearInterval(timerInterval);
+      timerRunning = false;
+      document.getElementById("playIcon").className = "bi bi-play-fill me-1";
+      document.getElementById("playText").innerText = "Start Focus";
+      document.getElementById("roomModeBadge").innerText = mode;
+
+      if (mode === "POMODORO") timerDuration = 1500;
+      if (mode === "SHORT_BREAK") timerDuration = 300;
+      if (mode === "LONG_BREAK") timerDuration = 900;
+      timerSeconds = timerDuration;
+      updateTimerDisplay();
+
+      try {
+        await fetch(`${API_BASE}/rooms/${currentRoomId}/timer/control`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mode: mode })
+        });
+      } catch (e) {}
+    }
+
+    // --- Chat Logic ---
+    async function sendChatMessage() {
+      const input = document.getElementById("chatInput");
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = "";
+
+      const box = document.getElementById("chatBox");
+      const d = document.createElement("div");
+      d.className = "mb-1";
+      d.innerHTML = `<strong class="text-info">You:</strong> ${text}`;
+      box.appendChild(d);
+      box.scrollTop = box.scrollHeight;
+
+      try {
+        await fetch(`${API_BASE}/rooms/${currentRoomId}/chat`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user: "Divya K.", message: text })
+        });
+      } catch (e) {}
+    }
+
+    // --- Flashcards & AI Engine ---
+    function flipCard() {
+      document.getElementById("flashcardInner").classList.toggle("flipped");
+    }
+
+    function renderCurrentCard() {
+      if (!flashcardsData || flashcardsData.length === 0) return;
+      const c = flashcardsData[currentCardIdx];
+      document.getElementById("cardTopic").innerText = c.topic;
+      document.getElementById("cardQuestion").innerText = c.question;
+      document.getElementById("cardAnswer").innerText = c.answer;
+      document.getElementById("cardIndex").innerText = currentCardIdx + 1;
+      document.getElementById("cardTotal").innerText = flashcardsData.length;
+      document.getElementById("flashcardInner").classList.remove("flipped");
+    }
+
+    function nextCard() {
+      if (flashcardsData.length === 0) return;
+      currentCardIdx = (currentCardIdx + 1) % flashcardsData.length;
+      renderCurrentCard();
+    }
+
+    async function reviewCard(quality) {
+      if (flashcardsData.length === 0) return;
+      const card = flashcardsData[currentCardIdx];
+      try {
+        await fetch(`${API_BASE}/flashcards/${card.id}/review`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ quality: quality })
+        });
+      } catch (e) {}
+      nextCard();
+    }
+
+    async function generateAiFlashcards() {
+      const topic = document.getElementById("aiTopicInput").value.trim() || "Cloud Architecture";
+      try {
+        const resp = await fetch(`${API_BASE}/ai/generate-flashcards`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ topic: topic })
+        });
+        const data = await resp.json();
+        if (data.cards) {
+          flashcardsData = data.cards.concat(flashcardsData);
+          currentCardIdx = 0;
+          renderCurrentCard();
+          alert(`✨ AI generated ${data.generated_count} new smart flashcards for "${topic}"!`);
+        }
+      } catch (e) {
+        alert("Error generating cards: " + e);
+      }
+    }
+
+    async function explainConcept() {
+      const topic = document.getElementById("aiTopicInput").value.trim() || "Multi-Cloud Disaster Recovery";
+      document.getElementById("feynmanOutput").innerHTML = `<span class="text-warning"><i class="bi bi-hourglass-split"></i> Synthesizing Feynman explanation for "${topic}"...</span>`;
+      try {
+        const resp = await fetch(`${API_BASE}/ai/explain`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ concept: topic })
+        });
+        const d = await resp.json();
+        document.getElementById("feynmanOutput").innerHTML = `
+          <div class="fw-bold text-info mb-1">${d.concept}:</div>
+          <div class="mb-2">${d.feynman_explanation}</div>
+          <ul class="mb-2 ps-3 text-secondary">
+            ${d.key_takeaways.map(t => `<li>${t}</li>`).join("")}
+          </ul>
+          <div class="p-2 border border-secondary rounded bg-black">
+            <strong>Checkpoint:</strong> ${d.quiz_question}<br>
+            <span class="text-success small">Ans: ${d.quiz_answer}</span>
+          </div>
+        `;
+      } catch (e) {
+        document.getElementById("feynmanOutput").innerText = "Error: " + e;
+      }
+    }
+
+    // --- Notes & Tasks ---
+    async function saveNote() {
+      const title = document.getElementById("noteTitle").value;
+      const content = document.getElementById("noteContent").value;
+      try {
+        await fetch(`${API_BASE}/notes`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title: title, content: content })
+        });
+        alert("💾 Study note saved to CloudSync storage!");
+      } catch (e) {
+        alert("Saved locally!");
+      }
+    }
+
+    async function addNewTask() {
+      const text = prompt("Enter new study sprint task:");
+      if (!text) return;
+      try {
+        await fetch(`${API_BASE}/tasks`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title: text })
+        });
+        loadTasks();
+      } catch (e) {}
+    }
+
+    async function loadTasks() {
+      try {
+        const resp = await fetch(`${API_BASE}/tasks`);
+        const data = await resp.json();
+        const list = document.getElementById("tasksList");
+        list.innerHTML = "";
+        data.tasks.forEach(t => {
+          const badgeColor = t.status === "DONE" ? "bg-success" : (t.status === "IN_PROGRESS" ? "bg-warning text-dark" : "bg-secondary");
+          const icon = t.status === "DONE" ? "bi-check-circle-fill text-success" : (t.status === "IN_PROGRESS" ? "bi-check-circle text-warning" : "bi-circle text-secondary");
+          const item = document.createElement("div");
+          item.className = "p-2 border border-secondary rounded bg-dark d-flex justify-content-between align-items-center small";
+          item.innerHTML = `
+            <span><i class="bi ${icon} me-1"></i> ${t.title}</span>
+            <span class="badge ${badgeColor}">${t.status}</span>
+          `;
+          list.appendChild(item);
+        });
+      } catch (e) {}
+    }
+
+    async function loadInitialData() {
+      updateTimerDisplay();
+      try {
+        const resp = await fetch(`${API_BASE}/flashcards`);
+        const data = await resp.json();
+        flashcardsData = data.flashcards || [];
+        renderCurrentCard();
+      } catch (e) {}
+
+      try {
+        const rResp = await fetch(`${API_BASE}/rooms/${currentRoomId}`);
+        const rData = await rResp.json();
+        if (rData.room) {
+          const chatBox = document.getElementById("chatBox");
+          chatBox.innerHTML = "";
+          rData.room.chat.forEach(c => {
+            const d = document.createElement("div");
+            d.className = "mb-1";
+            d.innerHTML = `<strong class="text-info">${c.user}:</strong> ${c.message}`;
+            chatBox.appendChild(d);
+          });
+        }
+      } catch (e) {}
+
+      loadTasks();
+    }
+
+    window.onload = loadInitialData;
+  </script>
+</body>
+</html>

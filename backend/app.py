@@ -4,21 +4,66 @@ import datetime
 import random
 import uuid
 from flask import Flask, request, jsonify, send_from_directory
-from flask_cors import CORS
+try:
+    from flask_cors import CORS
+except ImportError:
+    def CORS(app):
+        @app.after_request
+        def add_cors_headers(response):
+            response.headers["Access-Control-Allow-Origin"] = "*"
+            response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+            response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+            return response
+        return app
 
-WEB_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "web"))
-if not os.path.exists(WEB_DIR):
-    WEB_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "web"))
+CANDIDATE_DIRS = [
+    os.path.join(os.path.dirname(__file__), "web"),
+    os.path.join(os.path.dirname(__file__), "..", "web"),
+    os.path.join(os.path.dirname(__file__), "..", "public"),
+    os.path.join(os.path.dirname(__file__), "..", "api", "web"),
+    os.path.join(os.getcwd(), "web"),
+    os.path.join(os.getcwd(), "public"),
+    os.path.join(os.getcwd(), "backend", "web"),
+]
+STATIC_DIRS = [os.path.abspath(d) for d in CANDIDATE_DIRS if os.path.exists(d)]
+if not STATIC_DIRS:
+    STATIC_DIRS = [os.path.abspath(os.path.join(os.path.dirname(__file__), "web"))]
 
-PUBLIC_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "public"))
-if not os.path.exists(PUBLIC_DIR):
-    PUBLIC_DIR = WEB_DIR
-
-STATIC_DIRS = [WEB_DIR, PUBLIC_DIR]
+WEB_DIR = STATIC_DIRS[0]
 
 app = Flask(__name__, static_folder=WEB_DIR, static_url_path="")
 app.url_map.strict_slashes = False
 CORS(app)
+
+# WSGI middleware to accurately resolve Vercel serverless request path
+import urllib.parse
+
+class VercelPathFixer:
+    def __init__(self, wsgi_app):
+        self.wsgi_app = wsgi_app
+
+    def __call__(self, environ, start_response):
+        query = environ.get("QUERY_STRING", "")
+        params = urllib.parse.parse_qs(query)
+        if "__path__" in params and params["__path__"]:
+            real_path = params["__path__"][0]
+            if not real_path.startswith("/"):
+                real_path = "/" + real_path
+            environ["PATH_INFO"] = real_path
+            del params["__path__"]
+            environ["QUERY_STRING"] = urllib.parse.urlencode(params, doseq=True)
+        else:
+            path = environ.get("PATH_INFO", "")
+            for prefix in ["/api/index.py", "/api/index", "/api", "/index.py"]:
+                if path == prefix:
+                    environ["PATH_INFO"] = "/"
+                    break
+                elif path.startswith(prefix + "/"):
+                    environ["PATH_INFO"] = path[len(prefix):]
+                    break
+        return self.wsgi_app(environ, start_response)
+
+app.wsgi_app = VercelPathFixer(app.wsgi_app)
 
 PORT = int(os.environ.get("PORT", 8065))
 START_TIME = datetime.datetime.utcnow()
@@ -381,12 +426,32 @@ def tasks():
 
 # --- Static File Serving for Vercel & Render (Single Service Deployment) ---
 @app.route("/")
+@app.route("/index.html")
+@app.route("/api/index.py")
+@app.route("/api/index")
 def serve_index():
     for folder in STATIC_DIRS:
         idx_path = os.path.join(folder, "index.html")
         if os.path.exists(idx_path):
             return send_from_directory(folder, "index.html")
     return jsonify({"service": "Online Study Hub API", "status": "UP"}), 200
+
+@app.route("/resume.html")
+@app.route("/resume")
+def serve_resume():
+    for folder in STATIC_DIRS:
+        target = os.path.join(folder, "resume.html")
+        if os.path.exists(target):
+            return send_from_directory(folder, "resume.html")
+    return jsonify({"error": "Resume not found"}), 404
+
+@app.route("/Divya_Kumari_Resume.pdf")
+def serve_pdf():
+    for folder in STATIC_DIRS:
+        target = os.path.join(folder, "Divya_Kumari_Resume.pdf")
+        if os.path.exists(target):
+            return send_from_directory(folder, "Divya_Kumari_Resume.pdf", as_attachment=False, mimetype="application/pdf")
+    return jsonify({"error": "PDF not found"}), 404
 
 @app.route("/<path:filename>")
 def serve_static(filename):
