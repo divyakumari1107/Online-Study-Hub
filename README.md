@@ -1,8 +1,11 @@
 # Online Study Hub – AI-Powered Real-Time Collaborative Virtual Learning Platform
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-online--study--hub.vercel.app-success?style=for-the-badge&logo=vercel)](https://online-study-hub.vercel.app/)
+[![Live Resume](https://img.shields.io/badge/Live%20Resume-ATS%20Verified%201--Page-blue?style=for-the-badge&logo=googledocs)](https://online-study-hub.vercel.app/resume.html)
+[![Download Resume](https://img.shields.io/badge/Download-Resume%20PDF-red?style=for-the-badge&logo=adobeacrobatreader)](https://online-study-hub.vercel.app/Divya_Kumari_Resume.pdf)
+
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Vercel Deployment](https://img.shields.io/badge/Deploy-Vercel-black.svg?logo=vercel)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fdivyakumari1107%2FOnline-Study-Hub)
-[![Render Deployment](https://img.shields.io/badge/Deploy-Render-46E3B7.svg?logo=render)](https://render.com/deploy?repo=https://github.com/divyakumari1107/Online-Study-Hub)
+[![Vercel Deployment](https://img.shields.io/badge/Deployed-Vercel-black.svg?logo=vercel)](https://online-study-hub.vercel.app/)
 [![Frontend](https://img.shields.io/badge/Frontend-Glassmorphism%20%7C%20Web%20Audio%20API-purple.svg)](web/index.html)
 [![Backend](https://img.shields.io/badge/Backend-Python%203.11%20%2F%20Flask-blue.svg)](backend/app.py)
 [![Containers](https://img.shields.io/badge/Containers-Docker%20%2B%20Docker%20Compose-2496ed.svg)](docker-compose.yml)
@@ -90,31 +93,20 @@ docker compose up -d --build
 
 ---
 
-## 🌐 Live Cloud Deployment (Vercel & Render)
+## 🌐 Live Production Deployments
 
-This repository is pre-configured with turnkey deployment files for both **Vercel** (`vercel.json`, `api/index.py`) and **Render** (`render.yaml`).
+This project is deployed live on Vercel with serverless Python microservices and global CDN edge routing:
 
-### Option 1: Deploy on Vercel (Recommended for Instant CDN + Serverless)
-1. Go to [https://vercel.com/new](https://vercel.com/new) and log in with your GitHub account.
-2. Under **Import Git Repository**, choose `divyakumari1107/Online-Study-Hub`.
-3. Keep default settings (Vercel automatically detects `vercel.json` and Python runtime).
-4. Click **Deploy**.
-5. Your live app will be accessible at: `https://online-study-hub-xxx.vercel.app`
-   - App: `/`
-   - Resume: `/resume.html`
-   - PDF Download: `/Divya_Kumari_Resume.pdf`
-   - REST API: `/api/rooms`, `/api/flashcards`
+| Resource | Live Link | Description | Status |
+| :--- | :--- | :--- | :--- |
+| **Online Study Hub (Web App)** | **[https://online-study-hub.vercel.app/](https://online-study-hub.vercel.app/)** | Multiplayer Pomodoro, Lofi Sound Mixer, 3D SM-2 Flashcards | 🟢 **Live (200 OK)** |
+| **Divya's ATS Resume** | **[https://online-study-hub.vercel.app/resume.html](https://online-study-hub.vercel.app/resume.html)** | Harvard ATS-compliant 1-page resume with verified projects | 🟢 **Live (200 OK)** |
+| **Downloadable PDF Resume** | **[https://online-study-hub.vercel.app/Divya_Kumari_Resume.pdf](https://online-study-hub.vercel.app/Divya_Kumari_Resume.pdf)** | Direct 1-click ATS PDF download | 🟢 **Live (200 OK)** |
+| **Backend Health Probe** | **[https://online-study-hub.vercel.app/health](https://online-study-hub.vercel.app/health)** | Live REST API health check endpoint | 🟢 **Live (200 OK)** |
+| **Study Rooms REST API** | **[https://online-study-hub.vercel.app/api/rooms](https://online-study-hub.vercel.app/api/rooms)** | Real-time multiplayer synchronization API | 🟢 **Live (200 OK)** |
+| **Flashcards REST API** | **[https://online-study-hub.vercel.app/api/flashcards](https://online-study-hub.vercel.app/api/flashcards)** | SM-2 spaced repetition cognitive review API | 🟢 **Live (200 OK)** |
 
-### Option 2: Deploy on Render (Recommended for Continuous 24/7 Python Web Service)
-1. Go to [https://dashboard.render.com](https://dashboard.render.com) and log in.
-2. Click **New +** -> **Web Service** (or **Blueprints** to use `render.yaml`).
-3. Connect your GitHub repository `divyakumari1107/Online-Study-Hub`.
-4. Configure service settings:
-   - **Environment**: `Python 3`
-   - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: `gunicorn backend.app:app --bind 0.0.0.0:$PORT`
-5. Click **Deploy Web Service**.
-6. Your live app will be accessible at: `https://online-study-hub.onrender.com`
+---
 
 ### Run Automated Test Suite
 ```powershell
